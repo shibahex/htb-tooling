@@ -1,5 +1,5 @@
 {
-  description = "Hack The Box flake [.#full .#burp or .#master .#master-full]";
+  description = "Hack The Box flake [.#full .#burp or .#master-default .#master-full]";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
