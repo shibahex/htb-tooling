@@ -38,7 +38,7 @@
       ] ++ frameworks pkgs;
 
       frameworks = pkgs: with pkgs; [
-        metasploit wpscan
+        metasploit wpscan netexec
       ];
 
       prefixAttrs = prefix: attrs:
