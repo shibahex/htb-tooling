@@ -1,85 +1,51 @@
 {
-  description = "Hack The Box flake [.#full .#burp]";
-
+  description = "Hack The Box flake [.#full .#burp or .#master .#master-full]";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    # Optional burp shell will use this
+    nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     burpsuitepro = {
       url = "github:xiv3r/Burpsuite-Professional";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs =
-    {
-      self,
-      nixpkgs,
-      burpsuitepro,
-    }:
+  outputs = { self, nixpkgs, nixpkgs-master, burpsuitepro }:
     let
       system = "x86_64-linux";
+      burpPackage = burpsuitepro.packages.${system}.default;
 
-      pkgs = import nixpkgs {
+      mkPkgs = input: import input {
         inherit system;
         config.allowUnfree = true;
       };
 
-      # Core CLI tooling (lightweight)
-      basePackages = with pkgs; [
-        openvpn
-        nmap
-        nushell
-        sqlite
-        hashcat
-        unzip
-        awscli2
-        ffuf
+      mkShells = pkgs: {
+        default = pkgs.mkShell {
+          packages = basePackages pkgs;
+        };
+        burp = pkgs.mkShell {
+          packages = basePackages pkgs ++ [ burpPackage ];
+          buildInputs = [ pkgs.fontconfig ];
+          shellHook = ''
+            export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
+          '';
+        };
+      } // { full = (mkShells pkgs).burp; };
 
-      ## from pentesting in nutshell on HTB academy
-      metasploit
-      # ftp etc.
-      inetutils
-      # word press
-      wpscan
+      basePackages = pkgs: with pkgs; [
+        openvpn nmap nushell sqlite hashcat
+        unzip awscli2 ffuf metasploit inetutils wpscan
       ];
 
-      # Burp package (only used in specific shells)
-      burpPackage = burpsuitepro.packages.${system}.default;
+      prefixAttrs = prefix: attrs:
+        nixpkgs.lib.mapAttrs' (k: v:
+          nixpkgs.lib.nameValuePair "${prefix}-${k}" v
+        ) attrs;
+
     in
     {
-      devShells.${system} = {
-
-        # Default HTB shell (recommended everyday shell)
-        default = pkgs.mkShell {
-          packages = basePackages;
-        };
-
-        # Web testing shell (adds Burp)
-        burp = pkgs.mkShell {
-          packages = basePackages ++ [ burpPackage ];
-
-          buildInputs = with pkgs; [
-            fontconfig
-          ];
-
-          shellHook = ''
-            export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
-          '';
-        };
-
-        # Everything included
-        full = pkgs.mkShell {
-          packages = basePackages ++ [ burpPackage ];
-
-          buildInputs = with pkgs; [
-            fontconfig
-          ];
-
-          shellHook = ''
-            export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
-          '';
-        };
-      };
+      devShells.${system} =
+        mkShells (mkPkgs nixpkgs) //
+        prefixAttrs "master" (mkShells (mkPkgs nixpkgs-master));
     };
 }
