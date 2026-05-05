@@ -31,6 +31,13 @@
         unzip
         awscli2
         ffuf
+
+      ## from pentesting in nutshell on HTB academy
+      metasploit
+      # ftp etc.
+      inetutils
+      # word press
+      wpscan
       ];
 
       # Burp package (only used in specific shells)
