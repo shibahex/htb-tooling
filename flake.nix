@@ -34,7 +34,11 @@
 
       basePackages = pkgs: with pkgs; [
         openvpn nmap nushell sqlite hashcat
-        unzip awscli2 ffuf metasploit inetutils wpscan
+        unzip awscli2 ffuf inetutils
+      ] ++ frameworks pkgs;
+
+      frameworks = pkgs: with pkgs; [
+        metasploit wpscan
       ];
 
       prefixAttrs = prefix: attrs:
