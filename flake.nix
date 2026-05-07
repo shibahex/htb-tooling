@@ -35,6 +35,7 @@
       basePackages = pkgs: with pkgs; [
         openvpn nmap nushell sqlite hashcat
         unzip awscli2 ffuf inetutils exploitdb
+        gobuster
       ] ++ frameworks pkgs;
 
       frameworks = pkgs: with pkgs; [
