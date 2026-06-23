@@ -110,6 +110,9 @@
           inetutils
           exploitdb
           gobuster
+          whois
+          dig
+          wget
         ];
 
       automationPackages =
