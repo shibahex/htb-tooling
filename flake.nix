@@ -126,6 +126,7 @@
         pkgs: with pkgs; [
           cutter
           pince
+          imhex
         ];
 
       prefixAttrs =
