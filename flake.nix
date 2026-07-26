@@ -81,10 +81,16 @@
           ]
             fontHook;
 
-          reverse = mkCombined pkgs "reverse-engineering" [
-            (basePackages pkgs)
-            (reversePackages pkgs)
-          ] "printf '[+] Loaded reversing environment\n'";
+          reverse =
+            mkCombined pkgs "reverse-engineering"
+              [
+                (basePackages pkgs)
+                (reversePackages pkgs)
+              ]
+              ''
+                export _JAVA_AWT_WM_NONREPARENTING=1
+                printf '[+] Loaded reversing environment\n'
+              '';
 
           automation = mkCombined pkgs "automation" [
             (basePackages pkgs)
@@ -120,13 +126,21 @@
           metasploit
           wpscan
           netexec
+          sqlmap
         ];
 
       reversePackages =
         pkgs: with pkgs; [
-          cutter
           pince
           imhex
+          (cutter.withPlugins (
+            ps: with ps; [
+              jsdec
+              rz-ghidra
+            ]
+          ))
+
+          ghidra
         ];
 
       prefixAttrs =
